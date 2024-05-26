@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 #include <sstream>
 
 // Function to decrypt text using XOR with a key
@@ -14,48 +15,46 @@ std::vector<char> xorDecrypt(const std::vector<char>& text, const std::string& k
 }
 
 int main() {
-    std::string inputText, line;
     std::string key;
-
     std::cout << "Enter Decrypt key: ";
     std::cin >> key;
 
     std::cin.ignore();
 
-    // Read encrypted text as ASCII values
-    std::cout << "Enter text:\n";
+    std::ifstream inputFile("text.txt");
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open text.txt" << std::endl;
+        return 1;
+    }
+
     std::vector<int> asciiValues;
+    std::string line;
     int value;
-    int emptyLineCount = 0;
-    while (std::getline(std::cin, line)) {
+    while (std::getline(inputFile, line)) {
         if (line.empty()) {
-            emptyLineCount++;
-            if (emptyLineCount == 4) {
-                break;
-            }
-        } else {
-            emptyLineCount = 0;
-            std::istringstream iss(line);
-            while (iss >> value) {
-                asciiValues.push_back(value);
-            }
+            continue;
+        }
+        std::istringstream iss(line);
+        while (iss >> value) {
+            asciiValues.push_back(value);
         }
     }
 
-    // Convert ASCII values to characters
-    std::vector<char> encryptedText;
-    for (int val : asciiValues) {
-        encryptedText.push_back(static_cast<char>(val));
+    inputFile.close();
+
+    // Convert ASCII values to characters and decrypt in one step
+    std::vector<char> decryptedText;
+    size_t keyLength = key.size();
+    for (size_t i = 0; i < asciiValues.size(); ++i) {
+        decryptedText.push_back(static_cast<char>(asciiValues[i]) ^ key[i % keyLength]);
     }
 
-    // Decrypt the text
-    std::vector<char> decryptedText = xorDecrypt(encryptedText, key);
-    
-    // Convert the decrypted vector of characters back to a string
-    std::string decryptedStr(decryptedText.begin(), decryptedText.end());
-
     // Output the decrypted text
-    std::cout << "Decrypted text: " << std::endl << decryptedStr << std::endl;
+    std::cout << "Decrypted text: ";
+    for (char c : decryptedText) {
+        std::cout << c;
+    }
+    std::cout << std::endl;
 
     return 0;
 }
