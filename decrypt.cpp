@@ -49,12 +49,20 @@ int main() {
         decryptedText.push_back(static_cast<char>(asciiValues[i]) ^ key[i % keyLength]);
     }
 
-    // Output the decrypted text
-    std::cout << "Decrypted text: ";
-    for (char c : decryptedText) {
-        std::cout << c;
+    // Write the decrypted text to a file
+    std::ofstream outputFile("decrypted.txt");
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to create decrypted.txt" << std::endl;
+        return 1;
     }
-    std::cout << std::endl;
+
+    for (char c : decryptedText) {
+        outputFile << c;
+    }
+
+    outputFile.close();
+
+    std::cout << "Decrypted text written to decrypted.txt" << std::endl;
 
     return 0;
 }
